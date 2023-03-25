@@ -28,25 +28,29 @@
     <img id="imgBG"/>
     <div id="items"></div>
   </body>
+  <script type="text/javascript" src="js/pako.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function(){
       let itemsList = document.querySelector("#items");
       try {
         let params = new URLSearchParams(window.location.search);
         let base64 = params.get('fashion');
-        if (typeof base64 === null) {
-          itemsList.innerHTML = '<div class="error">Enter Fashion</div>';
-          return;
-        }
-        let data = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+        let charData = atob(base64).split('').map(function(x){return x.charCodeAt(0);});
+        let binData = pako.inflate(new Uint8Array(charData));
+        let data = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(binData)));
         let imgBG = document.querySelector("#imgBG");
-        imgBG.src = params.get('bg');
+        if (data.img == "") {
+          imgBG.src = "img/empty.png";
+        } else {
+          imgBG.src = data.img;
+        }
         imgBG.width = (window.innerWidth
           || document.documentElement.clientWidth
           || document.body.clientWidth) - 36;
         let leftFactor = imgBG.width / data.scale;
         function CreateItem(itemData) {
             let elem = document.createElement('a');
+            elem.title = itemData[0];
             elem.href = 'https://ffxiv.consolegameswiki.com/wiki/' + itemData[0];
             elem.target = '_blank';
             elem.style.left = Math.round(itemData[1] * leftFactor);
