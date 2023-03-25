@@ -1,0 +1,1 @@
+# fashion-report-ru.github.io
