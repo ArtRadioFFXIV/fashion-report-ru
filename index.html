@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        background: black;
+      }
+      #imgBG {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      div#items > a {
+        position: absolute;
+        display: block;
+        background: rgba(255, 255, 255, .1);
+      }
+      div#items > a:hover {
+        background: rgba(255, 255, 255, .3);
+      }
+      div.error {
+        font-size: 24pt;
+        color: #b23636;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="imgBG"/>
+    <div id="items"></div>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      let itemsList = document.querySelector("#items");
+      try {
+        let params = new URLSearchParams(window.location.search);
+        let base64 = params.get('fashion');
+        if (typeof base64 === null) {
+          itemsList.innerHTML = '<div class="error">Enter Fashion</div>';
+          return;
+        }
+        let data = JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+        let imgBG = document.querySelector("#imgBG");
+        imgBG.src = params.get('bg');
+        imgBG.width = (window.innerWidth
+          || document.documentElement.clientWidth
+          || document.body.clientWidth) - 36;
+        let leftFactor = imgBG.width / data.scale;
+        function CreateItem(itemData) {
+            let elem = document.createElement('a');
+            elem.href = 'https://ffxiv.consolegameswiki.com/wiki/' + itemData[0];
+            elem.target = '_blank';
+            elem.style.left = Math.round(itemData[1] * leftFactor);
+            elem.style.top = Math.round(itemData[2] * leftFactor);
+            elem.style.width = Math.round(itemData[3] * leftFactor);
+            elem.style.height = Math.round(itemData[4] * leftFactor);
+            itemsList.appendChild(elem);
+        }
+        data.items.forEach(function(item_dye) {
+          if (item_dye[0].length > 0) CreateItem(item_dye[0]);
+          if (item_dye[1].length > 0) CreateItem(item_dye[1]);
+        });
+        
+      } catch (error) {
+        itemsList.innerHTML = '<div class="error">' + error + '</div>';
+      }
+    });
+  </script>
+</html>
